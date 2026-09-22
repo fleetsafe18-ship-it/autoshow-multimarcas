@@ -4,7 +4,6 @@ export default function VideoBackground() {
       <video
         autoPlay
         muted
-        loop
         playsInline
         style={{
           position: 'fixed',
