@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, '..', '..', 'data');
+const baseDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, '..', '..');
+const dataDir = path.join(baseDir, 'data');
 fs.mkdirSync(dataDir, { recursive: true });
 
 const db = new DatabaseSync(path.join(dataDir, 'bsveiculos.sqlite3'));

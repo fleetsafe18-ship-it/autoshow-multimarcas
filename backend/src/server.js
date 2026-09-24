@@ -20,7 +20,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+const uploadsBaseDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, '..');
+app.use('/uploads', express.static(path.join(uploadsBaseDir, 'uploads')));
 
 app.use(authRouter);
 app.use(veiculosRouter);

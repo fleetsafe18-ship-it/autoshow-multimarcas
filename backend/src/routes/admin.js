@@ -4,28 +4,30 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
 import * as veiculosRepo from '../db/veiculosRepo.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+const uploadsBaseDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, '..', '..');
+const uploadsDir = path.join(uploadsBaseDir, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const MAX_FOTOS_POR_ENVIO = 24;
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${uuidv4()}${ext}`);
-  },
+  filename: (req, file, cb) => cb(null, `${uuidv4()}-orig`),
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 8 * 1024 * 1024, files: MAX_FOTOS_POR_ENVIO },
+  // 25MB: fotos de iPhone (HEIC/JPEG em alta resolução) costumam passar de 8MB.
+  limits: { fileSize: 25 * 1024 * 1024, files: MAX_FOTOS_POR_ENVIO },
   fileFilter: (req, file, cb) => {
-    const tiposAceitos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (tiposAceitos.includes(file.mimetype)) {
+    // Aceita qualquer imagem (inclusive HEIC/HEIF do iPhone) — o arquivo é
+    // normalizado para JPEG depois do upload, então o formato de origem não importa.
+    if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
       cb(new Error('Formato de imagem não suportado'));
@@ -95,6 +97,7 @@ adminRouter.delete('/veiculos/:id', async (req, res) => {
 adminRouter.post('/veiculos/:id/fotos', (req, res) => {
   upload.array('fotos', MAX_FOTOS_POR_ENVIO)(req, res, async (err) => {
     if (err) {
+      console.error('Upload de fotos rejeitado pelo multer:', err.message);
       return res.status(400).json({ erro: err.message });
     }
     if (!req.files || req.files.length === 0) {
@@ -107,7 +110,24 @@ adminRouter.post('/veiculos/:id/fotos', (req, res) => {
       return res.status(404).json({ erro: 'Veículo não encontrado' });
     }
 
-    const urls = req.files.map((file) => `/uploads/${file.filename}`);
+    const urls = [];
+    for (const file of req.files) {
+      const filename = `${path.parse(file.filename).name.replace(/-orig$/, '')}.jpg`;
+      const destino = path.join(uploadsDir, filename);
+      try {
+        await sharp(file.path).rotate().resize({ width: 1920, withoutEnlargement: true }).jpeg({ quality: 82 }).toFile(destino);
+        urls.push(`/uploads/${filename}`);
+      } catch (conversaoErr) {
+        console.error(`Falha ao normalizar foto ${file.originalname}:`, conversaoErr.message);
+      } finally {
+        fs.unlink(file.path, () => {});
+      }
+    }
+
+    if (urls.length === 0) {
+      return res.status(400).json({ erro: 'Não foi possível processar nenhuma das fotos enviadas' });
+    }
+
     const fotos = await veiculosRepo.adicionarFotos(req.params.id, urls);
     res.status(201).json(fotos);
   });
