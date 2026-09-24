@@ -37,5 +37,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`API BS Veículos rodando em http://localhost:${PORT}`);
+  console.log(`API AutoShow Multimarcas rodando em http://localhost:${PORT}`);
 });

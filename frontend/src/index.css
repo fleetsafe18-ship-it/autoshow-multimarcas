@@ -1,19 +1,20 @@
 :root {
-  --bg: #08080A;
-  --bg-elevated: #0F0F11;
-  --accent: #0F6CF1;
-  --accent-soft: #59A0FF;
-  --accent-glow: rgba(15, 108, 241, 0.55);
-  --text: #F5F3EF;
-  --text-secondary: #C9C7C1;
-  --text-muted: #9C9A94;
-  --text-faint: #6E6C68;
-  --text-body: #A8A6A0;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --glass-bg: rgba(23, 24, 28, 0.55);
-  --glass-bg-strong: rgba(15, 15, 17, 0.72);
+  --bg: #0B0D12;
+  --bg-elevated: #11141A;
+  --accent: #0058FF;
+  --accent-soft: #3D8BFF;
+  --accent-glow: rgba(0, 88, 255, 0.5);
+  --text: #F7F8FA;
+  --text-secondary: #D7DCE6;
+  --text-muted: #9AA3B4;
+  --text-faint: #7C8798;
+  --text-body: #C8CFDB;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --glass-bg: rgba(24, 27, 34, 0.55);
+  --glass-bg-strong: rgba(13, 15, 20, 0.8);
   --available: #2ED47A;
+  --radius-btn: 16px;
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Manrope', sans-serif;
 }
@@ -194,92 +195,266 @@ select {
   scrollbar-width: none;
 }
 
+/* ===== AutoShow: logo, hero layout, nav menu, tabs ===== */
+
+.hero {
+  position: relative;
+  min-height: 600px;
+}
+.hero-text {
+  position: relative;
+  z-index: 1;
+  padding: 96px 40px 34px 88px;
+}
+.hero-location {
+  position: relative;
+  z-index: 1;
+  padding: 0 40px 64px 88px;
+}
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--bg);
+  background-image: url('/img/fachada-fade.png');
+  background-size: cover;
+  background-position: 62% center;
+  background-repeat: no-repeat;
+}
+
+.pill-btn {
+  border-radius: var(--radius-btn);
+}
+
+.nav-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav-mobile-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 39;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 20px 26px;
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 24px 40px -20px rgba(0, 0, 0, 0.6);
+}
+.nav-mobile-panel a {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.stock-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+}
+.stock-header h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 36px;
+  letter-spacing: -0.6px;
+  margin: 0;
+}
+.tabs-row {
+  display: flex;
+  gap: 32px;
+}
+.hero-desc-extra {
+  display: inline;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0 20px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-faint);
+  position: relative;
+}
+.tab-btn.active {
+  color: var(--accent-soft);
+}
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.sobre-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.sobre-photo {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  aspect-ratio: 4 / 5;
+  box-shadow: 0 0 0 1px rgba(0, 88, 255, 0.18), 0 24px 48px -24px rgba(0, 0, 0, 0.6);
+}
+.sobre-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  display: block;
+}
+
 /* ===== Responsive breakpoints (matching the approved design) ===== */
 
 @media (max-width: 1024px) {
   .nav {
-    padding: 20px 40px !important;
-  }
-  .hero {
-    padding: 56px 40px !important;
-    grid-template-columns: 1fr !important;
-  }
-  .hero-visual {
-    display: none !important;
-  }
-  .hero-title {
-    font-size: 64px !important;
-  }
-  .trust {
-    padding: 28px 40px !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  .filters {
-    padding: 0 40px 24px !important;
-  }
-  .cards-grid {
-    padding: 0 40px 80px !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 24px !important;
-  }
-  .cta-banner {
-    padding: 48px 40px 72px !important;
-  }
-  .site-footer {
-    padding: 28px 40px !important;
-  }
-  .detail-wrap {
-    padding: 40px 40px 0 !important;
-  }
-  .detail-grid {
-    grid-template-columns: 1fr !important;
-    gap: 40px !important;
-  }
-  .price-panel {
-    position: static !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .nav {
     padding: 16px 20px !important;
-    gap: 12px;
   }
-  .nav-links {
+  .nav-logo {
+    height: 44px !important;
+  }
+  .nav-links,
+  .nav-cta {
     display: none !important;
   }
-  .nav-brand-title {
-    font-size: 17px !important;
-    letter-spacing: 0.5px !important;
+  .nav-menu-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
   }
-  .nav-cta {
-    font-size: 12px !important;
-    padding: 9px 14px !important;
-  }
+
   .hero {
-    padding: 40px 20px 36px !important;
+    min-height: auto !important;
+  }
+  .hero-text {
+    padding: 36px 20px 28px !important;
+  }
+  .hero-eyebrow {
+    margin-bottom: 10px !important;
   }
   .hero-title {
-    font-size: clamp(32px, 11vw, 46px) !important;
-    line-height: 1.05 !important;
+    font-size: clamp(32px, 8.6vw, 46px) !important;
+    letter-spacing: -1px !important;
+    margin-bottom: 18px !important;
   }
-  .trust {
-    padding: 20px 20px !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 16px !important;
+  .hero-desc {
+    font-size: 17px !important;
+    line-height: 1.6 !important;
+    max-width: none !important;
+    margin-bottom: 24px !important;
   }
-  .filters {
-    padding: 0 20px 20px !important;
-    overflow-x: auto;
-    flex-wrap: nowrap !important;
+  .hero-desc-extra {
+    display: none !important;
   }
+  .hero-cta-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+  .hero-cta-row a {
+    width: 100% !important;
+    padding: 18px 28px !important;
+    font-size: 16px !important;
+  }
+  .hero-photo {
+    position: relative !important;
+    inset: auto !important;
+    aspect-ratio: 899 / 577;
+    background-image: url('/img/fachada-autoshow.jpg') !important;
+    background-position: 38% 55% !important;
+  }
+  .hero-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      rgba(11, 13, 18, 0.7) 6%,
+      rgba(11, 13, 18, 0.4) 12%,
+      rgba(11, 13, 18, 0.18) 18%,
+      transparent 26%,
+      transparent 88%,
+      rgba(11, 13, 18, 0.3) 96%,
+      rgba(11, 13, 18, 0.55) 100%
+    );
+  }
+  .hero-location {
+    padding: 20px 20px 32px !important;
+  }
+
+  .stock-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 48px 20px 0 !important;
+  }
+  .stock-header h2 {
+    font-size: clamp(24px, 6.5vw, 30px) !important;
+  }
+  .tabs-row {
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+  }
+
   .cards-grid {
-    padding: 0 20px 56px !important;
-    grid-template-columns: 1fr !important;
+    padding: 32px 20px 72px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 18px !important;
   }
+  .card-body {
+    padding: 16px 16px 18px !important;
+  }
+  .card-title {
+    font-size: 16px !important;
+    margin: 3px 0 8px !important;
+  }
+  .card-meta {
+    font-size: 12px !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+  .card-price {
+    font-size: 18px !important;
+  }
+  .card-media {
+    height: 140px !important;
+  }
+  .sobre {
+    padding: 48px 20px !important;
+  }
+  .sobre-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+  .sobre-photo {
+    max-width: 220px;
+    aspect-ratio: 4 / 5;
+  }
   .cta-banner {
-    padding: 36px 20px 52px !important;
+    padding: 44px 20px 64px !important;
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 20px !important;
@@ -295,7 +470,30 @@ select {
     text-align: left !important;
   }
   .detail-wrap {
-    padding: 24px 20px 0 !important;
+    padding: 40px 20px 0 !important;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .price-panel {
+    position: static !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-text {
+    padding: 32px 18px 24px !important;
+  }
+  .hero-location {
+    padding: 18px 18px 28px !important;
+  }
+  .stock-header {
+    padding: 40px 18px 0 !important;
+  }
+  .cards-grid {
+    padding: 28px 18px 64px !important;
+    gap: 14px !important;
   }
   .gallery-main {
     height: 220px !important;

@@ -1,131 +1,108 @@
 import { motion } from 'framer-motion';
-import { SITE_NAME, SITE_LOCATION, whatsappLink } from '../lib/constants.js';
+import { SITE_NAME, whatsappLink } from '../lib/constants.js';
+import WhatsAppIcon from './WhatsAppIcon.jsx';
 
 export default function Hero() {
   return (
-    <section
-      className="hero grain"
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        padding: '88px 80px',
-        display: 'grid',
-        gridTemplateColumns: '1.1fr 0.8fr',
-        gap: 24,
-        alignItems: 'center',
-        borderBottom: '1px solid var(--border)',
-      }}
-    >
+    <section className="hero" style={{ position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
       <div
         style={{
           position: 'absolute',
-          top: -160,
-          left: -120,
-          width: 520,
-          height: 520,
+          top: -140,
+          left: -100,
+          width: 480,
+          height: 480,
           borderRadius: '50%',
-          background: 'radial-gradient(circle,rgba(15,108,241,0.16),transparent 70%)',
+          background: 'radial-gradient(circle,rgba(0,88,255,0.18),transparent 70%)',
           pointerEvents: 'none',
+          zIndex: 0,
         }}
       />
       <motion.div
+        className="hero-text"
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
-        style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 26 }}
+        style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
-          <span style={{ fontSize: 12, letterSpacing: 3, color: 'var(--accent)', fontWeight: 700 }}>
-            {SITE_NAME.toUpperCase()} · {SITE_LOCATION.toUpperCase()}
+        <div className="hero-eyebrow" style={{ marginBottom: 14 }}>
+          <span style={{ fontSize: 12, letterSpacing: 3, color: 'var(--text-faint)', fontWeight: 700 }}>
+            {SITE_NAME.toUpperCase()}
           </span>
         </div>
         <h1
           className="hero-title"
           style={{
             fontFamily: 'var(--font-display)',
-            fontWeight: 600,
-            fontSize: 64,
-            lineHeight: 1.04,
-            margin: 0,
+            fontWeight: 700,
+            fontSize: 'clamp(42px, calc(5.25vw - 15.7px), 72px)',
+            lineHeight: 1.08,
+            margin: '0 0 36px',
             letterSpacing: -2,
-            color: '#EDEBE6',
+            color: '#FFFFFF',
           }}
         >
-          Encontre o veículo certo
+          Seu próximo carro
           <br />
-          <span
-            style={{
-              fontWeight: 700,
-              letterSpacing: -2.5,
-              background: 'linear-gradient(100deg,var(--accent),#7DB4FF)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              color: 'transparent',
-              textShadow: '0 0 40px rgba(15,108,241,0.35)',
-            }}
-          >
-            pra você.
-          </span>
+          <span style={{ color: 'var(--accent)' }}>merece um AutoShow.</span>
         </h1>
-        <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--text-body)', maxWidth: 440, margin: 0 }}>
-          Carros, motos e caminhões com procedência garantida. Atendimento rápido, direto pelo WhatsApp.
+        <p className="hero-desc" style={{ fontSize: 19, lineHeight: 1.65, color: 'var(--text-body)', maxWidth: 560, margin: '0 0 38px' }}>
+          Conheça nossos veículos disponíveis e encontre o carro que combina com você.{' '}
+          <span className="hero-desc-extra">Fale com nossa equipe ou venha conhecer a loja.</span>
         </p>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <div className="hero-cta-row" style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           <a
             href="#estoque"
-            className="cta-link shine"
+            className="cta-link shine pill-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: 10,
-              background: 'linear-gradient(135deg,var(--accent),var(--accent-soft))',
-              color: '#0F0F11',
+              background: 'var(--accent)',
+              color: '#FFFFFF',
               fontWeight: 700,
-              fontSize: 15,
-              padding: '16px 30px',
-              borderRadius: 2,
-              boxShadow: '0 12px 28px -10px rgba(15,108,241,0.6)',
+              fontSize: 17,
+              padding: '25px 34px',
+              boxShadow: '0 16px 32px -12px rgba(0,88,255,0.55)',
             }}
           >
-            Ver estoque completo
+            Ver estoque
+            <span aria-hidden="true">→</span>
           </a>
           <a
             href={whatsappLink()}
             target="_blank"
             rel="noopener"
-            className="cta-link"
+            className="cta-link pill-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: 10,
               background: 'transparent',
               border: '1px solid var(--border-strong)',
               color: 'var(--text)',
-              fontWeight: 600,
-              fontSize: 15,
-              padding: '16px 30px',
-              borderRadius: 2,
+              fontWeight: 700,
+              fontSize: 17,
+              padding: '25px 34px',
             }}
           >
+            <WhatsAppIcon size={20} />
             Falar no WhatsApp
           </a>
         </div>
       </motion.div>
-      <motion.div
-        className="hero-visual"
-        initial={{ opacity: 0, x: 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, delay: 0.15, ease: [0.2, 0.8, 0.2, 1] }}
-        style={{ position: 'relative', height: 460 }}
-      >
-        <div style={{ position: 'absolute', bottom: 18, left: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-faint)', letterSpacing: 1, textTransform: 'uppercase' }}>
-            Consultor automotivo
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 700 }}>{SITE_NAME}</span>
-        </div>
-      </motion.div>
+
+      <div className="hero-photo" role="img" aria-label={`Fachada da loja ${SITE_NAME}`} />
+
+      <div className="hero-location" style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 10c0 6.5-9 12-9 12s-9-5.5-9-12a9 9 0 0118 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        <span style={{ fontSize: 15, color: 'var(--text-faint)' }}>Venha conhecer nossa loja</span>
+      </div>
     </section>
   );
 }

@@ -21,12 +21,13 @@ export default function VehicleCard({ veiculo }) {
           background: 'var(--glass-bg)',
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
-          borderRadius: 6,
+          borderRadius: 14,
           overflow: 'hidden',
           border: '1px solid var(--border)',
         }}
       >
         <div
+          className="card-media"
           style={{
             position: 'relative',
             height: 220,
@@ -82,21 +83,21 @@ export default function VehicleCard({ veiculo }) {
             Ver detalhes →
           </span>
         </div>
-        <div style={{ padding: '22px 24px 26px' }}>
+        <div className="card-body" style={{ padding: '22px 24px 26px' }}>
           <div style={{ fontSize: 12, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>
             {veiculo.marca}
           </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 21, margin: '4px 0 10px', letterSpacing: -0.4 }}>
+          <h3 className="card-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 21, margin: '4px 0 10px', letterSpacing: -0.4 }}>
             {veiculo.modelo} {veiculo.ano}
           </h3>
-          <div style={{ display: 'flex', gap: 10, fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+          <div className="card-meta" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
             <span>{veiculo.ano}</span>
             <span>·</span>
             <span>{formatKm(veiculo.km)}</span>
             <span>·</span>
             <span>{veiculo.cambio || '—'}</span>
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 24, letterSpacing: -0.4 }}>
+          <div className="card-price" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 24, letterSpacing: -0.4 }}>
             {formatPreco(veiculo.preco)}
           </div>
         </div>

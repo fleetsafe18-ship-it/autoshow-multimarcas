@@ -1,6 +1,6 @@
-# BS Veículos
+# AutoShow Multimarcas
 
-Site + painel admin da BS Veículos (carros, motos e caminhões — Adamantina/SP).
+Site + painel admin da AutoShow Multimarcas (carros e motos seminovos).
 
 ## Estrutura
 
@@ -63,6 +63,17 @@ Rotas `sim` exigem header `Authorization: Bearer <token>`.
 
 ## Identidade visual
 
-Dark mode (`#08080A`), acento azul `#0F6CF1` → `#59A0FF`, Space Grotesk (títulos) +
-Manrope (texto), cards e painéis em vidro fosco (glass), vídeo em loop no fundo da
-vitrine (`frontend/public/video/showroom.mp4`).
+Dark mode (`#0B0D12`), acento azul `#0058FF`, Space Grotesk (títulos) + Manrope
+(texto), cards e painéis em vidro fosco (glass). Logo em `frontend/public/img/logo-autoshow.png`
+(PNG com transparência real) e foto da fachada em `frontend/public/img/fachada-autoshow.jpg`.
+
+### Configuração pendente
+
+`frontend/src/lib/constants.js` centraliza os dados da loja. Os seguintes campos
+ainda não foram preenchidos com informações reais da AutoShow Multimarcas — o
+site funciona sem eles, mas os botões de WhatsApp e o endereço ficam inativos
+até serem configurados:
+
+- `WHATSAPP_NUMBER` / `WHATSAPP_DISPLAY`
+- `SITE_LOCATION` / `SITE_ADDRESS`
+- `INSTAGRAM_HANDLE` / `INSTAGRAM_URL`

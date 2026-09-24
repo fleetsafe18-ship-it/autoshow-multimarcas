@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../admin/AuthContext.jsx';
 import Logo from '../../components/Logo.jsx';
-import { SITE_NAME } from '../../lib/constants.js';
 
 export default function Login() {
   const { signIn } = useAuth();
@@ -50,13 +49,10 @@ export default function Login() {
           padding: 36,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
-          <Logo />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 1 }}>
-            {SITE_NAME.toUpperCase()}
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-faint)', fontWeight: 500, letterSpacing: 0 }}>
-              Painel administrativo
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
+          <Logo height={38} />
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-faint)', fontWeight: 500 }}>
+            Painel administrativo
           </div>
         </div>
 

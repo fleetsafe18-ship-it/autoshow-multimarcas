@@ -1,7 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 import Logo from '../components/Logo.jsx';
-import { SITE_NAME } from '../lib/constants.js';
 
 export default function AdminLayout() {
   const { signOut } = useAuth();
@@ -11,10 +10,8 @@ export default function AdminLayout() {
       <div className="nav-shell">
         <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 40px' }}>
           <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Logo size={36} />
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 1 }}>
-              {SITE_NAME.toUpperCase()} <span style={{ color: 'var(--text-faint)', fontWeight: 500, fontSize: 13 }}>· admin</span>
-            </div>
+            <Logo height={32} />
+            <span style={{ color: 'var(--text-faint)', fontWeight: 500, fontSize: 13 }}>· admin</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             <NavLink

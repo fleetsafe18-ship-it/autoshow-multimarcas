@@ -16,21 +16,26 @@ export default function Footer({ id = 'contato' }) {
         borderTop: '1px solid var(--border)',
       }}
     >
-      <span>
-        {SITE_NAME} · {SITE_LOCATION}
-      </span>
+      <h3 style={{ margin: 0, fontSize: 13, fontWeight: 500, color: 'inherit' }}>
+        {SITE_NAME}
+        {SITE_LOCATION ? ` em ${SITE_LOCATION}` : ''}
+      </h3>
       <span style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-        <a
-          href={INSTAGRAM_URL}
-          target="_blank"
-          rel="noopener"
-          style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}
-        >
-          <InstagramIcon /> {INSTAGRAM_HANDLE}
-        </a>
-        <a href={whatsappLink()} target="_blank" rel="noopener" style={{ color: 'var(--text-muted)' }}>
-          {WHATSAPP_DISPLAY}
-        </a>
+        {INSTAGRAM_URL && (
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)' }}
+          >
+            <InstagramIcon /> {INSTAGRAM_HANDLE}
+          </a>
+        )}
+        {WHATSAPP_DISPLAY && (
+          <a href={whatsappLink()} target="_blank" rel="noopener" style={{ color: 'var(--text-muted)' }}>
+            {WHATSAPP_DISPLAY}
+          </a>
+        )}
       </span>
     </footer>
   );

@@ -1,24 +1,10 @@
-export default function Logo({ size = 44 }) {
+export default function Logo({ height = 40, className }) {
   return (
-    <div
-      className="glow-ring"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        overflow: 'hidden',
-        flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#fff',
-      }}
-    >
-      <img
-        src="/img/logo.png"
-        alt="BS Veículos"
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-    </div>
+    <img
+      className={className}
+      src="/img/logo-autoshow.png"
+      alt="AutoShow Multimarcas"
+      style={{ height, width: 'auto', flexShrink: 0 }}
+    />
   );
 }

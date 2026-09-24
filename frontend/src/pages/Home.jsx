@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
 import Hero from '../components/Hero.jsx';
-import TrustBar from '../components/TrustBar.jsx';
 import Filters from '../components/Filters.jsx';
 import VehicleGrid from '../components/VehicleGrid.jsx';
+import Sobre from '../components/Sobre.jsx';
 import CtaBanner from '../components/CtaBanner.jsx';
 import Footer from '../components/Footer.jsx';
 import * as api from '../lib/api.js';
@@ -40,15 +40,15 @@ export default function Home() {
     <>
       <Nav />
       <Hero />
-      <TrustBar />
       <Filters ativo={tipo} onChange={setTipo} />
       {erro ? (
-        <section style={{ padding: '40px 80px 110px', textAlign: 'center', color: '#E23D3D' }}>
+        <section style={{ padding: '40px 88px 110px', textAlign: 'center', color: '#E23D3D' }}>
           Não foi possível carregar o estoque. Verifique se a API está rodando.
         </section>
       ) : (
         <VehicleGrid veiculos={veiculos} carregando={carregando} />
       )}
+      <Sobre />
       <CtaBanner />
       <Footer />
     </>

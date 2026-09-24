@@ -1,13 +1,24 @@
-export const SITE_NAME = 'BS Veículos';
+export const SITE_NAME = 'AutoShow Multimarcas';
+export const SITE_CITY = 'Adamantina';
+export const SITE_STATE = 'SP';
 export const SITE_LOCATION = 'Adamantina/SP';
-export const WHATSAPP_NUMBER = '5518996350086';
-export const WHATSAPP_DISPLAY = '(18) 99635-0086';
-export const INSTAGRAM_HANDLE = '@bsveiculos_';
-export const INSTAGRAM_URL = 'https://instagram.com/bsveiculos_';
+
+export const SITE_ADDRESS = 'Av. Marechal Castelo Branco, 155, Adamantina, SP';
+
+export const INSTAGRAM_HANDLE = '@autoshowmultimarcasadt';
+export const INSTAGRAM_URL = 'https://www.instagram.com/autoshowmultimarcasadt/';
+
+export const WHATSAPP_NUMBER = '5511952139323';
+export const WHATSAPP_DISPLAY = '(11) 95213-9323';
 
 export function whatsappLink(mensagem) {
+  if (!WHATSAPP_NUMBER) return '#';
   const base = `https://wa.me/${WHATSAPP_NUMBER}`;
   return mensagem ? `${base}?text=${encodeURIComponent(mensagem)}` : base;
+}
+
+export function mapsEmbedUrl() {
+  return `https://www.google.com/maps?q=${encodeURIComponent(SITE_ADDRESS)}&output=embed`;
 }
 
 export const TIPO_LABEL = {

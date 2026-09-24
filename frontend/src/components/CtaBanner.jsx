@@ -1,8 +1,9 @@
 import { whatsappLink } from '../lib/constants.js';
 
-export default function CtaBanner() {
+export default function CtaBanner({ id }) {
   return (
     <section
+      id={id}
       className="cta-banner"
       style={{
         position: 'relative',
@@ -43,19 +44,18 @@ export default function CtaBanner() {
         href={whatsappLink()}
         target="_blank"
         rel="noopener"
-        className="cta-pulse cta-link shine"
+        className="cta-pulse cta-link shine pill-btn"
         style={{
           position: 'relative',
           display: 'inline-flex',
           alignItems: 'center',
           gap: 10,
-          background: 'linear-gradient(135deg,var(--accent),var(--accent-soft))',
-          color: '#0F0F11',
+          background: 'var(--accent)',
+          color: '#FFFFFF',
           fontWeight: 700,
           fontSize: 15,
           padding: '18px 36px',
-          borderRadius: 2,
-          boxShadow: '0 14px 32px -10px rgba(15,108,241,0.65)',
+          boxShadow: '0 14px 32px -10px rgba(0,88,255,0.55)',
         }}
       >
         Falar no WhatsApp
