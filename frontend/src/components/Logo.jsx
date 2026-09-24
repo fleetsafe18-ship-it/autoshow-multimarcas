@@ -4,7 +4,7 @@ export default function Logo({ height = 40, className }) {
       className={className}
       src="/img/logo-autoshow.png"
       alt="AutoShow Multimarcas"
-      style={{ height, width: 'auto', flexShrink: 0 }}
+      style={{ height, width: 'auto', objectFit: 'contain', flexShrink: 0 }}
     />
   );
 }

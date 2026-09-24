@@ -46,7 +46,7 @@ export default function Sobre() {
             src={mapsEmbedUrl()}
             width="100%"
             height="220"
-            style={{ border: 0, borderRadius: 14, filter: 'grayscale(1) invert(0.92) contrast(0.9)', display: 'block' }}
+            style={{ border: '1px solid var(--border)', borderRadius: 14, display: 'block' }}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />

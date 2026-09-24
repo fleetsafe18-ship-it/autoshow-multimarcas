@@ -49,7 +49,7 @@ export default function Login() {
           padding: 36,
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, marginBottom: 32 }}>
           <Logo height={38} />
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--text-faint)', fontWeight: 500 }}>
             Painel administrativo
