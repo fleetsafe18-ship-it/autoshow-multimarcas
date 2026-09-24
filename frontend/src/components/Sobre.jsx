@@ -22,7 +22,7 @@ export default function Sobre() {
 
         <div className="sobre-text">
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20, margin: '0 0 4px' }}>
-            Matheus
+            Mateus
           </h3>
           <div style={{ fontSize: 13, color: 'var(--accent-soft)', fontWeight: 600, marginBottom: 16 }}>
             Fundador da {SITE_NAME}

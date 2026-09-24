@@ -44,7 +44,7 @@ export default function Hero() {
         >
           Seu próximo carro
           <br />
-          <span style={{ color: 'var(--accent)' }}>merece um AutoShow.</span>
+          <span style={{ color: 'var(--accent)' }}>merece um Autoshow.</span>
         </h1>
         <p className="hero-desc" style={{ fontSize: 19, lineHeight: 1.65, color: 'var(--text-body)', maxWidth: 560, margin: '0 0 38px' }}>
           Conheça nossos veículos disponíveis e encontre o carro que combina com você.{' '}

@@ -1,4 +1,4 @@
-export const SITE_NAME = 'AutoShow Multimarcas';
+export const SITE_NAME = 'Autoshow Multimarcas';
 export const SITE_CITY = 'Adamantina';
 export const SITE_STATE = 'SP';
 export const SITE_LOCATION = 'Adamantina/SP';
