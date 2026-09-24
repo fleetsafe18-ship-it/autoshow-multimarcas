@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 import * as api from '../../lib/api.js';
 import { assetUrl } from '../../lib/api.js';
+
+const OPCOES_COMPRESSAO = {
+  maxWidthOrHeight: 1920,
+  maxSizeMB: 2.5,
+  initialQuality: 0.8,
+  useWebWorker: true,
+};
 
 const TIPOS = [
   { valor: 'carro', label: 'Carro' },
@@ -36,6 +44,7 @@ export default function VehicleForm() {
   const [fotos, setFotos] = useState([]);
   const [carregando, setCarregando] = useState(editando);
   const [salvando, setSalvando] = useState(false);
+  const [comprimindo, setComprimindo] = useState(false);
   const [enviandoFotos, setEnviandoFotos] = useState(false);
   const [erro, setErro] = useState(null);
   const [avisoFotos, setAvisoFotos] = useState(null);
@@ -101,13 +110,29 @@ export default function VehicleForm() {
   }
 
   async function onEnviarFotos(e) {
-    const arquivos = e.target.files;
-    if (!arquivos || arquivos.length === 0) return;
-    setEnviandoFotos(true);
+    const arquivosOriginais = Array.from(e.target.files || []);
+    if (arquivosOriginais.length === 0) return;
     setErro(null);
     setAvisoFotos(null);
+
+    setComprimindo(true);
+    const arquivosParaEnviar = [];
+    for (const arquivo of arquivosOriginais) {
+      try {
+        arquivosParaEnviar.push(await imageCompression(arquivo, OPCOES_COMPRESSAO));
+      } catch (erroCompressao) {
+        // Formatos que o navegador não consegue decodificar em canvas (ex: HEIC em
+        // alguns navegadores) falham aqui — envia o arquivo original e deixa o
+        // backend (que já sabe lidar com HEIC) processar.
+        console.warn(`Não foi possível otimizar "${arquivo.name}", enviando original:`, erroCompressao.message);
+        arquivosParaEnviar.push(arquivo);
+      }
+    }
+    setComprimindo(false);
+
+    setEnviandoFotos(true);
     try {
-      const resposta = await api.adminEnviarFotos(veiculoId, arquivos);
+      const resposta = await api.adminEnviarFotos(veiculoId, arquivosParaEnviar);
       setFotos((f) => [...f, ...resposta.fotos]);
       if (resposta.aviso) setAvisoFotos(resposta.aviso);
     } catch (e) {
@@ -281,14 +306,14 @@ export default function VehicleForm() {
                 marginBottom: 20,
               }}
             >
-              {enviandoFotos ? 'Enviando…' : '+ Adicionar fotos'}
+              {comprimindo ? 'Otimizando fotos…' : enviandoFotos ? 'Enviando…' : '+ Adicionar fotos'}
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 multiple
                 onChange={onEnviarFotos}
-                disabled={enviandoFotos}
+                disabled={comprimindo || enviandoFotos}
                 style={{ display: 'none' }}
               />
             </label>
