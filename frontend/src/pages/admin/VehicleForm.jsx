@@ -38,6 +38,7 @@ export default function VehicleForm() {
   const [salvando, setSalvando] = useState(false);
   const [enviandoFotos, setEnviandoFotos] = useState(false);
   const [erro, setErro] = useState(null);
+  const [avisoFotos, setAvisoFotos] = useState(null);
   const [arrastando, setArrastando] = useState(null);
 
   useEffect(() => {
@@ -104,11 +105,13 @@ export default function VehicleForm() {
     if (!arquivos || arquivos.length === 0) return;
     setEnviandoFotos(true);
     setErro(null);
+    setAvisoFotos(null);
     try {
-      const novasFotos = await api.adminEnviarFotos(veiculoId, arquivos);
-      setFotos((f) => [...f, ...novasFotos]);
+      const resposta = await api.adminEnviarFotos(veiculoId, arquivos);
+      setFotos((f) => [...f, ...resposta.fotos]);
+      if (resposta.aviso) setAvisoFotos(resposta.aviso);
     } catch (e) {
-      setErro(e.message || 'Falha ao enviar fotos');
+      setErro(e.message || 'Falha ao enviar fotos. Tente novamente.');
     } finally {
       setEnviandoFotos(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -152,6 +155,9 @@ export default function VehicleForm() {
       </h1>
 
       {erro && <div style={{ color: '#E23D3D', marginBottom: 16 }}>{erro}</div>}
+      {avisoFotos && (
+        <div style={{ color: '#E2A03D', marginBottom: 16, fontSize: 13 }}>Aviso: {avisoFotos}</div>
+      )}
 
       <form onSubmit={salvar} style={{ display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 32 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>

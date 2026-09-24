@@ -96,11 +96,27 @@ export async function adminEnviarFotos(veiculoId, arquivos) {
   const formData = new FormData();
   Array.from(arquivos).forEach((arquivo) => formData.append('fotos', arquivo));
 
-  const res = await fetch(`${API_URL}/admin/veiculos/${veiculoId}/fotos`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: formData,
-  });
+  // Timeout explícito: em conexão de celular lenta, um fetch sem limite pode
+  // ficar pendurado por minutos sem nunca resolver nem rejeitar.
+  const controlador = new AbortController();
+  const tempoLimite = setTimeout(() => controlador.abort(), 120_000);
+
+  let res;
+  try {
+    res = await fetch(`${API_URL}/admin/veiculos/${veiculoId}/fotos`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: formData,
+      signal: controlador.signal,
+    });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error('O envio das fotos demorou demais e foi cancelado. Verifique sua conexão e tente novamente.');
+    }
+    throw new Error('Não foi possível enviar as fotos. Verifique sua conexão e tente novamente.');
+  } finally {
+    clearTimeout(tempoLimite);
+  }
   return handle(res);
 }
 

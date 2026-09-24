@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
+import heicConvert from 'heic-convert';
 import * as veiculosRepo from '../db/veiculosRepo.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -34,6 +35,24 @@ const upload = multer({
     }
   },
 });
+
+// Sharp (via libvips pré-compilado) não decodifica HEIC real (codec HEVC,
+// patenteado) — só o AVIF (heif com AV1). Fotos de iPhone tiradas da galeria
+// (sem "Mais compatível" ativado) vêm em HEIC de verdade e falham no sharp;
+// heic-convert (libheif em WASM) resolve esse caso como fallback.
+async function normalizarParaJpeg(caminhoOriginal) {
+  try {
+    return await sharp(caminhoOriginal).rotate().resize({ width: 1920, withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer();
+  } catch (erroSharp) {
+    const bufferOriginal = fs.readFileSync(caminhoOriginal);
+    const jpegConvertido = await heicConvert({ buffer: bufferOriginal, format: 'JPEG', quality: 0.9 });
+    return sharp(Buffer.from(jpegConvertido))
+      .rotate()
+      .resize({ width: 1920, withoutEnlargement: true })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+  }
+}
 
 function removerArquivoDaFoto(foto) {
   if (!foto || !foto.url || !foto.url.startsWith('/uploads/')) return;
@@ -111,25 +130,39 @@ adminRouter.post('/veiculos/:id/fotos', (req, res) => {
     }
 
     const urls = [];
+    const falhas = [];
     for (const file of req.files) {
       const filename = `${path.parse(file.filename).name.replace(/-orig$/, '')}.jpg`;
       const destino = path.join(uploadsDir, filename);
       try {
-        await sharp(file.path).rotate().resize({ width: 1920, withoutEnlargement: true }).jpeg({ quality: 82 }).toFile(destino);
+        const jpegBuffer = await normalizarParaJpeg(file.path);
+        fs.writeFileSync(destino, jpegBuffer);
         urls.push(`/uploads/${filename}`);
       } catch (conversaoErr) {
         console.error(`Falha ao normalizar foto ${file.originalname}:`, conversaoErr.message);
+        falhas.push(file.originalname || 'foto');
       } finally {
         fs.unlink(file.path, () => {});
       }
     }
 
     if (urls.length === 0) {
-      return res.status(400).json({ erro: 'Não foi possível processar nenhuma das fotos enviadas' });
+      return res.status(400).json({
+        erro:
+          falhas.length === 1
+            ? `Não foi possível processar a foto "${falhas[0]}". Tente novamente ou exporte em JPEG antes de enviar.`
+            : `Não foi possível processar nenhuma das ${falhas.length} fotos enviadas. Tente novamente ou exporte em JPEG antes de enviar.`,
+      });
     }
 
     const fotos = await veiculosRepo.adicionarFotos(req.params.id, urls);
-    res.status(201).json(fotos);
+    res.status(201).json({
+      fotos,
+      aviso:
+        falhas.length > 0
+          ? `${falhas.length} de ${req.files.length} foto(s) não puderam ser processadas e não foram salvas: ${falhas.join(', ')}.`
+          : undefined,
+    });
   });
 });
 
