@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
+import heic2any from 'heic2any';
 import * as api from '../../lib/api.js';
 import { assetUrl } from '../../lib/api.js';
 
@@ -10,6 +11,24 @@ const OPCOES_COMPRESSAO = {
   initialQuality: 0.8,
   useWebWorker: true,
 };
+
+function ehHeic(arquivo) {
+  return /^image\/hei[cf]/i.test(arquivo.type) || /\.hei[cf]$/i.test(arquivo.name);
+}
+
+// browser-image-compression usa <canvas> internamente, e a maioria dos
+// navegadores não decodifica HEIC (formato padrão do iPhone) via canvas.
+// Por isso o HEIC precisa ser convertido pra JPEG primeiro (heic2any, que usa
+// libheif via WASM) antes de passar pela compressão normal.
+async function processarFoto(arquivo) {
+  let entrada = arquivo;
+  if (ehHeic(arquivo)) {
+    const convertido = await heic2any({ blob: arquivo, toType: 'image/jpeg', quality: 0.9 });
+    const blob = Array.isArray(convertido) ? convertido[0] : convertido;
+    entrada = new File([blob], arquivo.name.replace(/\.hei[cf]$/i, '.jpg'), { type: 'image/jpeg' });
+  }
+  return imageCompression(entrada, OPCOES_COMPRESSAO);
+}
 
 const TIPOS = [
   { valor: 'carro', label: 'Carro' },
@@ -117,18 +136,32 @@ export default function VehicleForm() {
 
     setComprimindo(true);
     const arquivosParaEnviar = [];
+    const falhas = [];
     for (const arquivo of arquivosOriginais) {
       try {
-        arquivosParaEnviar.push(await imageCompression(arquivo, OPCOES_COMPRESSAO));
-      } catch (erroCompressao) {
-        // Formatos que o navegador não consegue decodificar em canvas (ex: HEIC em
-        // alguns navegadores) falham aqui — envia o arquivo original e deixa o
-        // backend (que já sabe lidar com HEIC) processar.
-        console.warn(`Não foi possível otimizar "${arquivo.name}", enviando original:`, erroCompressao.message);
-        arquivosParaEnviar.push(arquivo);
+        arquivosParaEnviar.push(await processarFoto(arquivo));
+      } catch (erroProcessamento) {
+        // Nunca envia o arquivo cru como fallback: um HEIC/foto grande sem
+        // processar pode passar de 20-40MB e estourar o limite do servidor
+        // depois de dezenas de segundos de upload. Melhor avisar na hora.
+        console.error(`Não foi possível processar "${arquivo.name}":`, erroProcessamento);
+        falhas.push(arquivo.name);
       }
     }
     setComprimindo(false);
+
+    if (falhas.length > 0) {
+      const msg =
+        falhas.length === arquivosOriginais.length
+          ? `Não foi possível processar ${falhas.length === 1 ? 'a foto' : 'as fotos'} (formato não suportado): ${falhas.join(', ')}. Tente tirar um print da foto ou usar outra imagem.`
+          : `${falhas.length} de ${arquivosOriginais.length} foto(s) não puderam ser processadas e não foram enviadas (formato não suportado): ${falhas.join(', ')}. Tente tirar um print ou usar outra imagem.`;
+      setErro(msg);
+    }
+
+    if (arquivosParaEnviar.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setEnviandoFotos(true);
     try {
