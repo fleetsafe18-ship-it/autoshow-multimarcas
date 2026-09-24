@@ -54,7 +54,7 @@ export default function VehicleForm() {
           combustivel: v.combustivel,
           cambio: v.cambio,
           cor: v.cor,
-          preco: v.preco,
+          preco: v.preco != null ? String(Math.round(v.preco)) : '',
           descricao: v.descricao,
           detalhes_extras: v.detalhes_extras,
           disponivel: v.disponivel,
@@ -70,6 +70,13 @@ export default function VehicleForm() {
       value: dados[chave],
       onChange: (e) => setDados((d) => ({ ...d, [chave]: e.target.value })),
     };
+  }
+
+  const precoFormatado = dados.preco ? Number(dados.preco).toLocaleString('pt-BR') : '';
+
+  function onChangePreco(e) {
+    const somenteDigitos = e.target.value.replace(/\D/g, '');
+    setDados((d) => ({ ...d, preco: somenteDigitos }));
   }
 
   async function salvar(e) {
@@ -206,7 +213,15 @@ export default function VehicleForm() {
         </div>
         <div>
           <label style={fieldLabel}>Preço (R$) *</label>
-          <input type="number" step="0.01" {...campo('preco')} required style={inputStyle} placeholder="98900" />
+          <input
+            type="text"
+            inputMode="numeric"
+            value={precoFormatado}
+            onChange={onChangePreco}
+            required
+            style={inputStyle}
+            placeholder="98.900"
+          />
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
