@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import heicConvert from 'heic-convert';
+import { exiftool } from 'exiftool-vendored';
 import * as veiculosRepo from '../db/veiculosRepo.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -21,14 +22,21 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, `${uuidv4()}-orig`),
 });
 
+// Extensões de RAW de câmera profissional: navegadores costumam não reconhecer
+// esses formatos e mandam file.type vazio ou application/octet-stream, então
+// não dá pra confiar só no mimetype pra esses casos.
+const EXTENSOES_RAW = /\.(cr2|cr3|nef|arw|dng|tif|tiff)$/i;
+
 const upload = multer({
   storage,
-  // 25MB: fotos de iPhone (HEIC/JPEG em alta resolução) costumam passar de 8MB.
-  limits: { fileSize: 25 * 1024 * 1024, files: MAX_FOTOS_POR_ENVIO },
+  // 100MB: RAW de câmera profissional (CR2/CR3/NEF/ARW/DNG) costuma passar
+  // dos 25MB antigos — o processamento pesado agora é todo no servidor.
+  limits: { fileSize: 100 * 1024 * 1024, files: MAX_FOTOS_POR_ENVIO },
   fileFilter: (req, file, cb) => {
-    // Aceita qualquer imagem (inclusive HEIC/HEIF do iPhone) — o arquivo é
-    // normalizado para JPEG depois do upload, então o formato de origem não importa.
-    if (file.mimetype.startsWith('image/')) {
+    // Aceita qualquer imagem (inclusive HEIC/HEIF do iPhone e RAW de câmera) —
+    // o arquivo é normalizado para JPEG depois do upload, então o formato de
+    // origem não importa.
+    if (file.mimetype.startsWith('image/') || EXTENSOES_RAW.test(file.originalname)) {
       cb(null, true);
     } else {
       cb(new Error('Formato de imagem não suportado'));
@@ -36,21 +44,44 @@ const upload = multer({
   },
 });
 
+function redimensionarERecomprimir(entrada) {
+  return sharp(entrada).rotate().resize({ width: 1920, withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer();
+}
+
+// RAW de câmera profissional (CR2/CR3/NEF/ARW/DNG) não tem o sensor bruto
+// decodificável pelo sharp nem pelo heic-convert — mas praticamente toda
+// câmera grava um preview JPEG embutido no próprio arquivo. O exiftool sabe
+// extrair esse preview de qualquer fabricante, sem precisar demosaicar o RAW.
+async function extrairPreviewDeRaw(caminhoOriginal) {
+  const caminhoPreview = `${caminhoOriginal}-preview.jpg`;
+  try {
+    try {
+      await exiftool.extractJpgFromRaw(caminhoOriginal, caminhoPreview);
+    } catch {
+      await exiftool.extractPreview(caminhoOriginal, caminhoPreview);
+    }
+    return await redimensionarERecomprimir(caminhoPreview);
+  } finally {
+    fs.unlink(caminhoPreview, () => {});
+  }
+}
+
 // Sharp (via libvips pré-compilado) não decodifica HEIC real (codec HEVC,
 // patenteado) — só o AVIF (heif com AV1). Fotos de iPhone tiradas da galeria
 // (sem "Mais compatível" ativado) vêm em HEIC de verdade e falham no sharp;
-// heic-convert (libheif em WASM) resolve esse caso como fallback.
+// heic-convert (libheif em WASM) resolve esse caso como fallback. Se nem
+// isso funcionar, tenta como RAW de câmera (preview embutido via exiftool).
 async function normalizarParaJpeg(caminhoOriginal) {
   try {
-    return await sharp(caminhoOriginal).rotate().resize({ width: 1920, withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer();
+    return await redimensionarERecomprimir(caminhoOriginal);
   } catch (erroSharp) {
-    const bufferOriginal = fs.readFileSync(caminhoOriginal);
-    const jpegConvertido = await heicConvert({ buffer: bufferOriginal, format: 'JPEG', quality: 0.9 });
-    return sharp(Buffer.from(jpegConvertido))
-      .rotate()
-      .resize({ width: 1920, withoutEnlargement: true })
-      .jpeg({ quality: 82 })
-      .toBuffer();
+    try {
+      const bufferOriginal = fs.readFileSync(caminhoOriginal);
+      const jpegConvertido = await heicConvert({ buffer: bufferOriginal, format: 'JPEG', quality: 0.9 });
+      return await redimensionarERecomprimir(Buffer.from(jpegConvertido));
+    } catch (erroHeic) {
+      return await extrairPreviewDeRaw(caminhoOriginal);
+    }
   }
 }
 

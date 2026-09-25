@@ -97,9 +97,11 @@ export async function adminEnviarFotos(veiculoId, arquivos) {
   Array.from(arquivos).forEach((arquivo) => formData.append('fotos', arquivo));
 
   // Timeout explícito: em conexão de celular lenta, um fetch sem limite pode
-  // ficar pendurado por minutos sem nunca resolver nem rejeitar.
+  // ficar pendurado por minutos sem nunca resolver nem rejeitar. 10 minutos dá
+  // folga pra lotes de fotos grandes (RAW de câmera profissional, até 100MB
+  // cada) sem passar do limite de 15min que a própria Railway já impõe.
   const controlador = new AbortController();
-  const tempoLimite = setTimeout(() => controlador.abort(), 120_000);
+  const tempoLimite = setTimeout(() => controlador.abort(), 600_000);
 
   let res;
   try {

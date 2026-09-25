@@ -12,22 +12,48 @@ const OPCOES_COMPRESSAO = {
   useWebWorker: true,
 };
 
+// Acima disso não vale a pena tentar comprimir no navegador: fotos de câmera
+// profissional (RAW de 50-100MB+, alta resolução) travariam o celular tentando
+// decodificar via canvas. O backend agora tem processamento robusto o
+// suficiente pra fazer esse trabalho pesado — só manda direto.
+const LIMITE_COMPRESSAO_NAVEGADOR = 15 * 1024 * 1024;
+const TEMPO_LIMITE_COMPRESSAO_MS = 8000;
+
 function ehHeic(arquivo) {
   return /^image\/hei[cf]/i.test(arquivo.type) || /\.hei[cf]$/i.test(arquivo.name);
 }
 
+function comTimeout(promessa, ms) {
+  return Promise.race([
+    promessa,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('tempo esgotado')), ms)),
+  ]);
+}
+
 // browser-image-compression usa <canvas> internamente, e a maioria dos
-// navegadores não decodifica HEIC (formato padrão do iPhone) via canvas.
-// Por isso o HEIC precisa ser convertido pra JPEG primeiro (heic2any, que usa
-// libheif via WASM) antes de passar pela compressão normal.
+// navegadores não decodifica HEIC (formato padrão do iPhone) nem RAW de
+// câmera via canvas. Por isso o HEIC precisa ser convertido pra JPEG primeiro
+// (heic2any, que usa libheif via WASM) antes de passar pela compressão normal.
+//
+// Essa etapa é só uma otimização de melhor esforço: se o arquivo for grande
+// demais, ou a conversão/compressão falhar ou demorar, manda o arquivo
+// original pro backend, que agora sabe processar de tudo (incluindo RAW
+// profissional) e dá um erro claro se realmente não conseguir.
 async function processarFoto(arquivo) {
-  let entrada = arquivo;
-  if (ehHeic(arquivo)) {
-    const convertido = await heic2any({ blob: arquivo, toType: 'image/jpeg', quality: 0.9 });
-    const blob = Array.isArray(convertido) ? convertido[0] : convertido;
-    entrada = new File([blob], arquivo.name.replace(/\.hei[cf]$/i, '.jpg'), { type: 'image/jpeg' });
+  if (arquivo.size > LIMITE_COMPRESSAO_NAVEGADOR) return arquivo;
+
+  try {
+    let entrada = arquivo;
+    if (ehHeic(arquivo)) {
+      const convertido = await heic2any({ blob: arquivo, toType: 'image/jpeg', quality: 0.9 });
+      const blob = Array.isArray(convertido) ? convertido[0] : convertido;
+      entrada = new File([blob], arquivo.name.replace(/\.hei[cf]$/i, '.jpg'), { type: 'image/jpeg' });
+    }
+    return await comTimeout(imageCompression(entrada, OPCOES_COMPRESSAO), TEMPO_LIMITE_COMPRESSAO_MS);
+  } catch (erro) {
+    console.warn(`Não foi possível otimizar "${arquivo.name}" no navegador, enviando original para o servidor processar:`, erro.message);
+    return arquivo;
   }
-  return imageCompression(entrada, OPCOES_COMPRESSAO);
 }
 
 const TIPOS = [
@@ -139,11 +165,12 @@ export default function VehicleForm() {
     const falhas = [];
     for (const arquivo of arquivosOriginais) {
       try {
+        // processarFoto só otimiza de melhor esforço: se não conseguir (ou o
+        // arquivo for grande demais), já resolve com o arquivo original — o
+        // backend é quem processa de verdade agora. Esse catch só cobre uma
+        // falha realmente inesperada antes disso.
         arquivosParaEnviar.push(await processarFoto(arquivo));
       } catch (erroProcessamento) {
-        // Nunca envia o arquivo cru como fallback: um HEIC/foto grande sem
-        // processar pode passar de 20-40MB e estourar o limite do servidor
-        // depois de dezenas de segundos de upload. Melhor avisar na hora.
         console.error(`Não foi possível processar "${arquivo.name}":`, erroProcessamento);
         falhas.push(arquivo.name);
       }
